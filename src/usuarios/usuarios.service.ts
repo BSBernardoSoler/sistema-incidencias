@@ -68,6 +68,9 @@ export class UsuariosService {
       skip: (page - 1) * limit,
       take: limit,
       relations: ['rol'],
+      order: {
+        id: 'DESC',
+      },
     });
     return {
       data: usuarios,
