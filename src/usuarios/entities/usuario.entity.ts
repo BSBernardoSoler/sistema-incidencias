@@ -24,13 +24,13 @@ export class User {
   correo: string;
 
 
-  @Column()
+  @Column({select: false})
   password: string;
 
   @Column({default: 1})
   estado: number;
 
-  @Column({ type: 'date' })
+  @Column({ type: 'date', default: () => 'CURRENT_DATE' })
   fecha_ingreso: Date;
   
   @ManyToOne(() => Role, rol => rol.usuarios)

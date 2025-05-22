@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -63,19 +63,66 @@ export class UsuariosService {
     });
   }
 
-  findAll() {
-    return `This action returns all usuarios`;
+  async findAll(page: number = 1, limit: number = 10) {
+    const [usuarios, total] = await this.userRepository.findAndCount({
+      skip: (page - 1) * limit,
+      take: limit,
+      relations: ['rol'],
+    });
+    return {
+      data: usuarios,
+      total,
+      page,
+      lastPage: Math.ceil(total / limit),
+    };
   }
 
   findOne(id: number) {   
      return this.userRepository.findOneBy({ id }); 
   }
 
-  update(id: number, updateUsuarioDto: UpdateUsuarioDto) {
-    return `This action updates a #${id} usuario`;
+  async update(id: number, updateUsuarioDto: UpdateUsuarioDto) {
+    // Buscar el usuario existente
+    const usuario = await this.userRepository.findOne({
+      where: { id },
+      relations: ['rol'],
+    });
+    if (!usuario) {
+      throw new Error(`Usuario con id ${id} no encontrado`);
+    }
+
+    // Validar correo si se está actualizando
+    if (updateUsuarioDto.correo && updateUsuarioDto.correo !== usuario.correo) {
+      const existeCorreo = await this.userRepository.findOneBy({ correo: updateUsuarioDto.correo });
+      if (existeCorreo) {
+        throw new Error('El correo ya está en uso por otro usuario');
+      }
+    }
+
+    // Validar DNI si se está actualizando
+    if (updateUsuarioDto.dni && updateUsuarioDto.dni !== usuario.dni) {
+      const existeDni = await this.userRepository.findOneBy({ dni: updateUsuarioDto.dni });
+      if (existeDni) {
+        throw new Error('El DNI ya está en uso por otro usuario');
+      }
+    }
+
+    // Actualizar los campos permitidos
+    Object.assign(usuario, updateUsuarioDto);
+
+    // Guardar los cambios
+    return await this.userRepository.save(usuario);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} usuario`;
+  async remove(id: number) {
+    const usuario = await this.userRepository.findOneBy({ id });
+    if (!usuario) {
+      throw new HttpException(`Usuario con id ${id} no encontrado`, HttpStatus.NOT_FOUND);
+    }
+    if (usuario.estado === 0) {
+      throw new HttpException('El usuario ya está eliminado', HttpStatus.BAD_REQUEST);
+    }
+    usuario.estado = 0;
+    return await this.userRepository.save(usuario);
   }
 }

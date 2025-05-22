@@ -20,7 +20,4 @@ export class CreateMetaDto {
   @IsOptional()
   @IsInt()
   estado?: number;
-
-  @IsDateString()
-  fecha_registro: string;
 }

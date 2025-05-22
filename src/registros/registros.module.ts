@@ -3,9 +3,10 @@ import { RegistrosService } from './registros.service';
 import { RegistrosController } from './registros.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Registro } from './entities/registro.entity';
+import { User } from 'src/usuarios/entities/usuario.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Registro])], // Add your imports here if needed
+  imports: [TypeOrmModule.forFeature([Registro,User])], // Add your imports here if needed
   controllers: [RegistrosController],
   providers: [RegistrosService],
   exports: [RegistrosService], // Export the service if needed in other modules

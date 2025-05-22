@@ -17,8 +17,7 @@ export class Meta {
 
   @Column()
   meta_mensual: number;
-
-  @Column({ type: 'timestamp' })
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   fecha_registro: Date;
 
   @Column({ default: 1})

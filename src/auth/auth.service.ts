@@ -43,7 +43,6 @@ export class AuthService {
     dni : createUsuarioDto.dni,
     rol_id : createUsuarioDto.rol_id,
     correo : createUsuarioDto.correo,
-    fecha_ingreso : new Date().toISOString(),
    },role);
 
    if(!newuser){
@@ -51,7 +50,13 @@ export class AuthService {
    }
    
    return {
-   correo: createUsuarioDto.correo,role: role.nombre,
+    id: newuser.id,
+    nombres: newuser.nombres,
+    apellidos: newuser.apellidos,
+    dni: newuser.dni,
+    correo: newuser.correo,
+    rol_id: newuser.rol_id,
+    estado: newuser.estado,
    }
 
  }
@@ -70,10 +75,16 @@ if(!isPasswordValid){
 const payload ={usuario : user.correo , role: [{nombre:user.rol.nombre}]};
 const role= user.rol.nombre;
 const token = await this.jwtService.signAsync(payload);
+const nombre = user.nombres;
+const id= user.id;
 return {
   token,
-  email,
-  role
+  user: {
+    id,
+    nombre,
+    email,
+    role
+  }
 };
 }
 

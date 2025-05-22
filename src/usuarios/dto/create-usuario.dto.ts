@@ -27,10 +27,6 @@ export class CreateUsuarioDto {
   @IsInt()
   estado?: number;
 
-  @IsNotEmpty()
-  @IsDateString()
-  fecha_ingreso: string;
-
   @IsInt()
   rol_id: number;
 }
