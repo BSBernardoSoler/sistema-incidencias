@@ -24,6 +24,10 @@ export class User {
   correo: string;
 
 
+  @Column({default: null})
+  telefono: string;
+
+
   @Column({select: false})
   password: string;
 

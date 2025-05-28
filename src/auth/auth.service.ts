@@ -43,6 +43,7 @@ export class AuthService {
     dni : createUsuarioDto.dni,
     rol_id : createUsuarioDto.rol_id,
     correo : createUsuarioDto.correo,
+    telefono : createUsuarioDto.telefono,
    },role);
 
    if(!newuser){

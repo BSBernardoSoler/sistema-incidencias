@@ -19,6 +19,11 @@ export class CreateUsuarioDto {
   correo: string;
 
 
+  @IsOptional()
+  @IsString()
+  telefono?: string;
+
+
   @IsNotEmpty()
   @IsString()
   password: string;
