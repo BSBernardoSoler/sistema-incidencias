@@ -50,12 +50,13 @@ export class MetasService {
   }
 
 
-    async findAll(page: number = 1, limit: number = 10) {
+    async findAll(page: number, limit: number) {
       const [result, total] = await this.metasRepository.findAndCount({
         where: { estado: Not(0) }, // Filtrar por estado diferente de 0
-        order: { id: 'ASC' }, // Ordenar por ID de forma ascendente
+        order: { id: 'DESC' }, // Ordenar por ID de forma ascendente
         skip: (page - 1) * limit, // Saltar registros según la página
         take: limit, // Limitar la cantidad de registros
+        relations: ['usuario'], // Incluir la relación con el usuario
       });
 
       return {

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { MetasService } from './metas.service';
 import { CreateMetaDto } from './dto/create-meta.dto';
 import { UpdateMetaDto } from './dto/update-meta.dto';
@@ -11,11 +11,18 @@ export class MetasController {
   create(@Body() createMetaDto: CreateMetaDto) {
     return this.metasService.create(createMetaDto);
   }
+@Get()
+findAll(
+  @Query('page') page: string,
+  @Query('limit') limit: string
+) {
+  const pageNumber = Number(page) || 1;
+  const limitNumber = Number(limit) || 10;
+  const skip = (pageNumber - 1) * limitNumber;
 
-  @Get()
-  findAll() {
-    return this.metasService.findAll();
-  }
+  return this.metasService.findAll(pageNumber, limitNumber);
+}
+
 
   @Get(':id')
   findOne(@Param('id') id: string) {

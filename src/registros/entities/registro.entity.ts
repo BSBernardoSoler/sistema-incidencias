@@ -30,6 +30,9 @@ export class Registro {
   @Column({ nullable: true })
   observaciones: string;
 
+  @Column({ default: null })
+  lote : string;
+
   @Column({ default: 1 })   
   estado: number;
 
