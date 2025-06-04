@@ -142,7 +142,10 @@ export class UsuariosService {
       usuario.password = await bcryptjs.hash(updateUsuarioDto.password, 10);
     }
      
-
+    // Si no se envía una contraseña, mantener la contraseña actual
+    else {
+      updateUsuarioDto.password = usuario.password;
+    }
 
     // Actualizar los campos permitidos (excepto rol y password, que ya se asignaron si corresponde)
     Object.assign(usuario, { ...updateUsuarioDto, rol: usuario.rol ,password: usuario.password });
