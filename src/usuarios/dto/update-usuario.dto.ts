@@ -21,7 +21,6 @@ export class UpdateUsuarioDto {
 
     @IsOptional()
     @IsString()
-    @IsNotEmpty()
     @Matches(/^\d{9}$/, { message: 'El teléfono debe tener exactamente 9 dígitos' })
     telefono?: string;
 

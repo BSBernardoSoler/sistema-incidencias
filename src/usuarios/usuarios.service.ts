@@ -74,7 +74,7 @@ export class UsuariosService {
         nombres: true,
         apellidos: true,
         telefono: true,
-        password: true, // No devolver la contraseña
+        password: false, // No devolver la contraseña
         correo: true,
         dni: true,
         estado: true,

@@ -20,17 +20,18 @@ export class AuthService {
 
 // funcion para registrar usuarios
  async registerUsuarios(createUsuarioDto: CreateUsuarioDto){
-    const user  = await this.usuarioService.findOneByCorreo(createUsuarioDto.correo);
-    const dni  = await this.usuarioService.findOneByDni(createUsuarioDto.dni);
     const role  = await this.rolService.findOneRol(createUsuarioDto.rol_id);
 
     
     if(!role){
       throw new HttpException("Este rol no exite",HttpStatus.CONFLICT);
    }
+       const user  = await this.usuarioService.findOneByCorreo(createUsuarioDto.correo);
+
     if(user){
        throw new HttpException("este correo ya ha sido registrado en la app",HttpStatus.CONFLICT);
     }
+    const dni  = await this.usuarioService.findOneByDni(createUsuarioDto.dni);
 
     if( dni){
       throw new HttpException("este dni ya ha sido registrado en un usuario",HttpStatus.CONFLICT);
