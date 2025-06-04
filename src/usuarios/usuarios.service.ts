@@ -5,6 +5,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/usuario.entity';
 import { Repository } from 'typeorm';
 import { Role } from 'src/roles/entities/role.entity';
+import * as  bcryptjs from 'bcryptjs';
+
 
 @Injectable()
 export class UsuariosService {
@@ -67,6 +69,21 @@ export class UsuariosService {
     const [usuarios, total] = await this.userRepository.findAndCount({
       skip: (page - 1) * limit,
       take: limit,
+      select: {
+        id: true,
+        nombres: true,
+        apellidos: true,
+        telefono: true,
+        password: true, // No devolver la contraseña
+        correo: true,
+        dni: true,
+        estado: true,
+        rol: {
+          id: true,
+          nombre: true,
+          descripcion: true,
+        },
+      },
       relations: ['rol'],
       order: {
         id: 'DESC',
@@ -110,9 +127,27 @@ export class UsuariosService {
       }
     }
 
-    // Actualizar los campos permitidos
-    Object.assign(usuario, updateUsuarioDto);
+    // Si se envía un rolId en el DTO, buscar el objeto rol y asignarlo
+    if (updateUsuarioDto.rol_id) {
+      const rolRepository = this.userRepository.manager.getRepository(Role);
+      const rol = await rolRepository.findOneBy({ id: updateUsuarioDto.rol_id });
+      if (!rol) {
+        throw new Error('El rol especificado no existe');
+      }
+      usuario.rol = rol;
+    }
 
+    // Encriptar la contraseña si se está actualizando
+    if (updateUsuarioDto.password) {
+      usuario.password = await bcryptjs.hash(updateUsuarioDto.password, 10);
+    }
+     
+
+
+    // Actualizar los campos permitidos (excepto rol y password, que ya se asignaron si corresponde)
+    Object.assign(usuario, { ...updateUsuarioDto, rol: usuario.rol ,password: usuario.password });
+    // Evitar sobreescribir password si no se actualizó
+   
     // Guardar los cambios
     return await this.userRepository.save(usuario);
   }
