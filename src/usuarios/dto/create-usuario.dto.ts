@@ -13,7 +13,7 @@ export class CreateUsuarioDto {
   @IsNotEmpty()
   @IsString()
   @Matches(/^\d{8}$/, { message: 'El DNI debe tener exactamente 8 dígitos' })
-  dni?: string;
+  dni: string;
 
 
   @IsNotEmpty()
@@ -24,7 +24,7 @@ export class CreateUsuarioDto {
   @IsOptional()
   @IsString()
   @Matches(/^\d{9}$/, { message: 'El teléfono debe tener exactamente 9 dígitos' })
-  telefono?: string;
+  telefono: string;
 
    
   @IsNotEmpty()
