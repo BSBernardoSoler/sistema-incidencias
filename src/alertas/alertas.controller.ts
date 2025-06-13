@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { AlertasService } from './alertas.service';
 import { CreateAlertaDto } from './dto/create-alerta.dto';
 import { UpdateAlertaDto } from './dto/update-alerta.dto';
@@ -13,8 +13,13 @@ export class AlertasController {
   }
 
   @Get()
-  findAll() {
-    return this.alertasService.findAll();
+  findAll(
+    @Query('page') page: string,
+    @Query('limit') limit: string
+  ) {
+    const pageNumber = Number(page) || 1;
+    const limitNumber = Number(limit) || 10;
+    return this.alertasService.findAll(pageNumber, limitNumber);
   }
 
   @Get(':id')

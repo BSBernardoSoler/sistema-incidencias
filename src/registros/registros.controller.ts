@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { RegistrosService } from './registros.service';
 import { CreateRegistroDto } from './dto/create-registro.dto';
 import { UpdateRegistroDto } from './dto/update-registro.dto';
@@ -13,8 +13,14 @@ export class RegistrosController {
   }
 
   @Get()
-  findAll() {
-    return this.registrosService.findAll();
+  findAll(
+     @Query('page') page: string,
+      @Query('limit') limit: string
+  ) {
+  const pageNumber = Number(page) || 1;
+  const limitNumber = Number(limit) || 10;
+  const skip = (pageNumber - 1) * limitNumber;
+    return this.registrosService.findAll(pageNumber, limitNumber);
   }
 
   @Get(':id')

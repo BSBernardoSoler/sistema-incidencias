@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { ObservacionesService } from './observaciones.service';
 import { CreateObservacionDto } from './dto/create-observacione.dto';
 import { UpdateObservacioneDto } from './dto/update-observacione.dto';
@@ -13,8 +13,14 @@ export class ObservacionesController {
   }
 
   @Get()
-  findAll() {
-    return this.observacionesService.findAll();
+  findAll(
+      @Query('page') page: string,
+      @Query('limit') limit: string
+  ) {
+  const pageNumber = Number(page) || 1;
+  const limitNumber = Number(limit) || 10;
+  const skip = (pageNumber - 1) * limitNumber;
+    return this.observacionesService.findAll(pageNumber, limitNumber);
   }
 
   @Get(':id')

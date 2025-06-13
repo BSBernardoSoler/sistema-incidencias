@@ -31,11 +31,14 @@ export class AlertasService {
     return this.alertaRepository.save(alerta);
   }
 
-  async findAll(): Promise<Alerta[]> {
-    return this.alertaRepository.find({
+  async findAll(page: number = 1, limit: number = 10): Promise<{ data: Alerta[]; total: number; page: number; limit: number }> {
+    const [data, total] = await this.alertaRepository.findAndCount({
       where: { estado: 1 },
       relations: ['registro'],
+      skip: (page - 1) * limit,
+      take: limit,
     });
+    return { data, total, page, limit };
   }
 
   async findOne(id: number): Promise<Alerta> {

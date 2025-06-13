@@ -40,8 +40,14 @@ export class ObservacionesService {
     return this.observacionRepository.save(observacion);
   }
 
-  async findAll(): Promise<Observacion[]> {
-    return this.observacionRepository.find({ relations: ['registro', 'usuarioReporta'] });
+  async findAll(page: number = 1, limit: number = 10): Promise<{ data: Observacion[]; total: number; page: number; limit: number }> {
+    const [data, total] = await this.observacionRepository.findAndCount({
+      relations: ['registro', 'usuarioReporta'],
+      skip: (page - 1) * limit,
+      take: limit,
+      order: { id: 'DESC' },
+    });
+    return { data, total, page, limit };
   }
 
   async findOne(id: number): Promise<Observacion> {

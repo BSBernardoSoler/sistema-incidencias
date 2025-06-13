@@ -45,11 +45,20 @@ export class HistorialCambiosService {
 
     return await this.historialCambioRepository.save(historialCambio);
   }
-
-  async findAll() {
-    return await this.historialCambioRepository.find({
+  async findAll(page: number , limit: number ) {
+    const [result, total] = await this.historialCambioRepository.findAndCount({
       relations: ['registro', 'usuarioModifica'],
+      skip: (page - 1) * limit,
+      take: limit,
+      order: { fecha_modificacion: 'DESC' },
     });
+
+    return {
+      data: result,
+      total,
+      page,
+      lastPage: Math.ceil(total / limit),
+    };
   }
 
   async findOne(id: number) {

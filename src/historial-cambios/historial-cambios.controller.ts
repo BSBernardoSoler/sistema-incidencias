@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { HistorialCambiosService } from './historial-cambios.service';
 import { CreateHistorialCambioDto } from './dto/create-historial-cambio.dto';
 import { UpdateHistorialCambioDto } from './dto/update-historial-cambio.dto';
@@ -13,8 +13,13 @@ export class HistorialCambiosController {
   }
 
   @Get()
-  findAll() {
-    return this.historialCambiosService.findAll();
+  findAll(
+    @Query('page') page: string,
+    @Query('limit') limit: string
+  ) {
+    const pageNumber = Number(page) || 1;
+    const limitNumber = Number(limit) || 10;
+    return this.historialCambiosService.findAll(pageNumber, limitNumber);
   }
 
   @Get(':id')

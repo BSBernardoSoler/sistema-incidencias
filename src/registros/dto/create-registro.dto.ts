@@ -15,6 +15,11 @@ export class CreateRegistroDto {
   @IsString()
   hora_inicio: string;
 
+ @IsNotEmpty()
+  @IsString()
+  lote: string;
+
+
   @IsNotEmpty()
   @IsString()
   hora_fin: string;

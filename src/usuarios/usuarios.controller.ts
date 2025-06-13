@@ -17,9 +17,9 @@ export class UsuariosController {
     return this.usuariosService.findAll(pageNumber, limitNumber);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usuariosService.findOne(+id);
+  @Get('dni/:dni')
+  findOneBydni(@Param('dni') dni: string) {
+    return this.usuariosService.findUserByDni(dni);
   }
 
   @Patch(':id')
