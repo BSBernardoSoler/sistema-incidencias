@@ -11,6 +11,7 @@ import { RolesModule } from './roles/roles.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { envs } from './config/envs';
+import { AlertasWebsocketsModule } from './alertas-websockets/alertas-websockets.module';
 
 
 @Module({
@@ -33,7 +34,8 @@ import { envs } from './config/envs';
     HistorialCambiosModule, 
     AlertasModule,
     RolesModule,
-    AuthModule
+    AuthModule,
+    AlertasWebsocketsModule
   ],
   controllers: [AppController],
   providers: [AppService],

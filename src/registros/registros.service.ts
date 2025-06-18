@@ -1,10 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { forwardRef, HttpException, HttpStatus, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateRegistroDto } from './dto/create-registro.dto';
 import { UpdateRegistroDto } from './dto/update-registro.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Registro } from './entities/registro.entity';
 import { Repository } from 'typeorm';
 import { User } from 'src/usuarios/entities/usuario.entity';
+import { AlertasWebsocketsGateway } from 'src/alertas-websockets/alertas-websockets.gateway';
 
 @Injectable()
 export class RegistrosService {
@@ -13,6 +14,8 @@ export class RegistrosService {
     private readonly registroRepository: Repository<Registro>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @Inject(forwardRef(() => AlertasWebsocketsGateway)) 
+    private readonly alertasWebsocketsGateWay: AlertasWebsocketsGateway, // Inject the AlertasWebsocketsService
   ) {}
 
   async create(createRegistroDto: CreateRegistroDto): Promise<Registro> {
@@ -28,7 +31,13 @@ export class RegistrosService {
       ...createRegistroDto,
       usuario,
     });
-    return this.registroRepository.save(registro);
+
+    const newRegistro = await this.registroRepository.save(registro)
+    if (!newRegistro) {
+      throw new HttpException('Error al crear el registro', HttpStatus.BAD_REQUEST);
+    }
+    this.alertasWebsocketsGateWay.notifyClient(newRegistro, `Nuevo registro creado con el lote ${newRegistro.lote} por el usuario ${usuario.nombres} ${usuario.apellidos}`, 'info');
+    return newRegistro;
   }
 
   async findAll(page: number = 1, limit: number = 10): Promise<{ data: Registro[]; total: number; page: number; limit: number }> {
@@ -69,7 +78,13 @@ export class RegistrosService {
     }
 
     Object.assign(registro, updateRegistroDto);
-    return this.registroRepository.save(registro);
+    const updatedRegistro = await this.registroRepository.save(registro);
+    if (!updatedRegistro) {
+      throw new HttpException('Error al actualizar el registro', HttpStatus.BAD_REQUEST);
+    }
+    this.alertasWebsocketsGateWay.notifyClient(updatedRegistro, `Registro actualizado numero ${updatedRegistro.id}`, 'info');
+    return updatedRegistro;
+
   }
 
   async remove(id: number): Promise<void> {

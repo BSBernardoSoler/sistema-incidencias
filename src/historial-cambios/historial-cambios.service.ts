@@ -6,6 +6,7 @@ import { Repository } from 'typeorm';
 import { HistorialCambio } from './entities/historial-cambio.entity';
 import { Registro } from '../registros/entities/registro.entity';
 import { User } from '../usuarios/entities/usuario.entity';
+import { AlertasWebsocketsGateway } from 'src/alertas-websockets/alertas-websockets.gateway';
 
 @Injectable()
 export class HistorialCambiosService {
@@ -16,6 +17,7 @@ export class HistorialCambiosService {
     private readonly registroRepository: Repository<Registro>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly alertasWebsocketsGateWay: AlertasWebsocketsGateway,
   ) {}
 
   async create(createHistorialCambioDto: CreateHistorialCambioDto) {
@@ -42,15 +44,19 @@ export class HistorialCambiosService {
       fecha_modificacion: createHistorialCambioDto.fecha_modificacion,
       estado: createHistorialCambioDto.estado ?? 1,
     });
-
-    return await this.historialCambioRepository.save(historialCambio);
+    const newHistorialCambio = await this.historialCambioRepository.save(historialCambio);
+    if (!newHistorialCambio) {
+      throw new Error('Error al crear el historial de cambios');
+    }
+    this.alertasWebsocketsGateWay.notifyClient(registro, `se ha hecho un cambio en el registro ${registro.id}`, 'historial-cambios');
+    return newHistorialCambio;
   }
   async findAll(page: number , limit: number ) {
     const [result, total] = await this.historialCambioRepository.findAndCount({
       relations: ['registro', 'usuarioModifica'],
       skip: (page - 1) * limit,
       take: limit,
-      order: { fecha_modificacion: 'DESC' },
+      order: { id: 'DESC' },
     });
 
     return {

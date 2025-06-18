@@ -5,9 +5,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { HistorialCambio } from './entities/historial-cambio.entity';
 import { Registro } from 'src/registros/entities/registro.entity';
 import { User } from 'src/usuarios/entities/usuario.entity';
+import { AlertasWebsocketsModule } from 'src/alertas-websockets/alertas-websockets.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([HistorialCambio,Registro,User])], // Add your imports here if needed
+  imports: [TypeOrmModule.forFeature([HistorialCambio,Registro,User]),AlertasWebsocketsModule], // Add your imports here if needed
   controllers: [HistorialCambiosController],
   providers: [HistorialCambiosService],
   exports: [HistorialCambiosService], // Export the service if needed in other modules

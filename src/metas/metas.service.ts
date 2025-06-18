@@ -98,15 +98,21 @@ export class MetasService {
     Object.assign(meta, { ...updateMetaDto });
     const updateMeta = await this.metasRepository.save(meta);
     if (!updateMeta) {
-      throw new HttpException('Error al actualizar la meta', HttpStatus.INTERNAL_SERVER_ERROR);
+      console.error('Error al actualizar la meta:', updateMeta);
+      throw new HttpException('Error al actualizar la meta', HttpStatus.BAD_REQUEST);
     }
     return updateMeta;
   }
 
-  remove(id: number) {
-    const meta = this.metasRepository.findOneBy({ id, estado: Not(0) });
+  async remove(id: number) {
+    const meta = await this.metasRepository.findOneBy({ id, estado: Not(0) });
     if (!meta) {
       throw new HttpException('Meta no encontrada', HttpStatus.NOT_FOUND);
+    }
+    meta.estado = 0; // Cambiar el estado a 0 para eliminar lógicamente
+    const result = await this.metasRepository.save(meta);
+    if (!result) {
+      throw new HttpException('Error al eliminar la meta', HttpStatus.BAD_REQUEST);
     }
     return meta;
   }

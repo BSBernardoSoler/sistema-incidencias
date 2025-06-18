@@ -5,9 +5,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Observacion } from './entities/observacione.entity';
 import { Registro } from 'src/registros/entities/registro.entity';
 import { User } from 'src/usuarios/entities/usuario.entity';
+import { AlertasWebsocketsModule } from 'src/alertas-websockets/alertas-websockets.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Observacion,Registro,User])], // Add your imports here if needed
+  imports: [TypeOrmModule.forFeature([Observacion,Registro,User]),AlertasWebsocketsModule], // Add your imports here if needed
   controllers: [ObservacionesController],
   providers: [ObservacionesService],
   exports: [ObservacionesService], // Export the service if needed in other modules

@@ -34,6 +34,7 @@ export class AlertasService {
   async findAll(page: number = 1, limit: number = 10): Promise<{ data: Alerta[]; total: number; page: number; limit: number }> {
     const [data, total] = await this.alertaRepository.findAndCount({
       where: { estado: 1 },
+      order: { id: 'DESC' },
       relations: ['registro'],
       skip: (page - 1) * limit,
       take: limit,

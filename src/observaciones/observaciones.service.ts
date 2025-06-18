@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateObservacionDto } from './dto/create-observacione.dto';
 import { UpdateObservacioneDto } from './dto/update-observacione.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -6,6 +6,7 @@ import { Observacion } from './entities/observacione.entity';
 import { Repository } from 'typeorm';
 import { Registro } from 'src/registros/entities/registro.entity';
 import { User } from 'src/usuarios/entities/usuario.entity';
+import { AlertasWebsocketsGateway } from 'src/alertas-websockets/alertas-websockets.gateway';
 
 @Injectable()
 export class ObservacionesService {
@@ -16,17 +17,18 @@ export class ObservacionesService {
     private readonly registroRepository: Repository<Registro>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly alertasWebsocketsGateway: AlertasWebsocketsGateway, // Inject the AlertasWebsocketsService
   ) {}
 
   async create(createObservacioneDto: CreateObservacionDto): Promise<Observacion> {
     // Validar existencia de registro y usuario
     const registro = await this.registroRepository.findOne({ where: { id: createObservacioneDto.registro_id } });
     if (!registro) {
-      throw new NotFoundException('Registro no encontrado');
+      throw new HttpException('Registro no encontrado', HttpStatus.NOT_FOUND);
     }
     const usuario = await this.userRepository.findOne({ where: { id: createObservacioneDto.usuario_reporta_id } });
     if (!usuario) {
-      throw new NotFoundException('Usuario no encontrado');
+      throw new HttpException('Usuario no encontrado', HttpStatus.NOT_FOUND);
     }
     const observacion = this.observacionRepository.create({
       detalle_observacion: createObservacioneDto.detalle_observacion,
@@ -37,7 +39,12 @@ export class ObservacionesService {
       registro,
       usuarioReporta: usuario,
     });
-    return this.observacionRepository.save(observacion);
+    const newObservacion = await this.observacionRepository.save(observacion);
+    if (!newObservacion) {
+      throw new HttpException('Error al crear la observación', HttpStatus.BAD_REQUEST);
+    }
+    this.alertasWebsocketsGateway.notifyClient(registro, `Nueva observación creada en el registro ${registro.id}`, 'observacion-creada');
+    return newObservacion;
   }
 
   async findAll(page: number = 1, limit: number = 10): Promise<{ data: Observacion[]; total: number; page: number; limit: number }> {
