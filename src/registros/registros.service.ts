@@ -21,7 +21,7 @@ export class RegistrosService {
   async create(createRegistroDto: CreateRegistroDto): Promise<Registro> {
     // Validación de usuario
     const usuario = await this.userRepository.findOne({
-      where: { id: createRegistroDto.usuario_id },
+      where: { id: createRegistroDto.usuario_id, estado: Not(0) }, // Asegurarse de que el usuario esté activo
     });
     if (!usuario) {
       throw new NotFoundException('Usuario no encontrado');
@@ -53,7 +53,7 @@ export class RegistrosService {
 
   async findOne(id: number): Promise<Registro> {
     const registro = await this.registroRepository.findOne({
-      where: { id },
+      where: { id , estado: Not(0) },
       relations: ['usuario', 'observacionesList', 'cambios', 'alertas'],
     });
     if (!registro) {
@@ -63,7 +63,7 @@ export class RegistrosService {
   }
 
   async update(id: number, updateRegistroDto: UpdateRegistroDto): Promise<Registro> {
-    const registro = await this.registroRepository.findOne({ where: { id } });
+    const registro = await this.registroRepository.findOne({ where: { id , estado: Not(0) } });
     if (!registro) {
       throw new NotFoundException(`Registro #${id} no encontrado`);
     }
@@ -88,7 +88,7 @@ export class RegistrosService {
 
   }
   async remove(id: number): Promise<{ message: string; status: HttpStatus }> {
-    const registro = await this.registroRepository.findOne({ where: { id } });
+    const registro = await this.registroRepository.findOne({ where: { id , estado: Not(0) } });
     if (!registro) {
       throw new HttpException(`Registro #${id} no encontrado`, HttpStatus.NOT_FOUND);
     }
