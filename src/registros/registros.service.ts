@@ -3,7 +3,7 @@ import { CreateRegistroDto } from './dto/create-registro.dto';
 import { UpdateRegistroDto } from './dto/update-registro.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Registro } from './entities/registro.entity';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { User } from 'src/usuarios/entities/usuario.entity';
 import { AlertasWebsocketsGateway } from 'src/alertas-websockets/alertas-websockets.gateway';
 
@@ -42,6 +42,7 @@ export class RegistrosService {
 
   async findAll(page: number = 1, limit: number = 10): Promise<{ data: Registro[]; total: number; page: number; limit: number }> {
     const [data, total] = await this.registroRepository.findAndCount({
+      where: { estado: Not(0) }, // Filtrar registros activos
       relations: ['usuario', 'observacionesList', 'cambios', 'alertas'],
       skip: (page - 1) * limit,
       take: limit,
@@ -86,11 +87,19 @@ export class RegistrosService {
     return updatedRegistro;
 
   }
-
-  async remove(id: number): Promise<void> {
-    const result = await this.registroRepository.delete(id);
-    if (result.affected === 0) {
-      throw new NotFoundException(`Registro #${id} no encontrado`);
+  async remove(id: number): Promise<{ message: string; status: HttpStatus }> {
+    const registro = await this.registroRepository.findOne({ where: { id } });
+    if (!registro) {
+      throw new HttpException(`Registro #${id} no encontrado`, HttpStatus.NOT_FOUND);
+    }
+    registro.estado = 0;
+    const resultado = await this.registroRepository.save(registro);
+    if (!resultado) {
+      throw new HttpException('Error al eliminar el registro', HttpStatus.BAD_REQUEST);
+    }
+    return {
+      message: `Registro #${id} eliminado correctamente`,
+      status: HttpStatus.OK,
     }
   }
 }
