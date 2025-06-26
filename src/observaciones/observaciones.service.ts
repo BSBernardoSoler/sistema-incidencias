@@ -3,7 +3,7 @@ import { CreateObservacionDto } from './dto/create-observacione.dto';
 import { UpdateObservacioneDto } from './dto/update-observacione.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Observacion } from './entities/observacione.entity';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { Registro } from 'src/registros/entities/registro.entity';
 import { User } from 'src/usuarios/entities/usuario.entity';
 import { AlertasWebsocketsGateway } from 'src/alertas-websockets/alertas-websockets.gateway';
@@ -22,11 +22,11 @@ export class ObservacionesService {
 
   async create(createObservacioneDto: CreateObservacionDto): Promise<Observacion> {
     // Validar existencia de registro y usuario
-    const registro = await this.registroRepository.findOne({ where: { id: createObservacioneDto.registro_id } });
+    const registro = await this.registroRepository.findOne({ where: { id: createObservacioneDto.registro_id , estado: Not(0) } });
     if (!registro) {
       throw new HttpException('Registro no encontrado', HttpStatus.NOT_FOUND);
     }
-    const usuario = await this.userRepository.findOne({ where: { id: createObservacioneDto.usuario_reporta_id } });
+    const usuario = await this.userRepository.findOne({ where: { id: createObservacioneDto.usuario_reporta_id , estado: Not(0) } });
     if (!usuario) {
       throw new HttpException('Usuario no encontrado', HttpStatus.NOT_FOUND);
     }
@@ -49,6 +49,7 @@ export class ObservacionesService {
 
   async findAll(page: number = 1, limit: number = 10): Promise<{ data: Observacion[]; total: number; page: number; limit: number }> {
     const [data, total] = await this.observacionRepository.findAndCount({
+      where: { estado: Not(0) }, // Filtrar observaciones activas
       relations: ['registro', 'usuarioReporta'],
       skip: (page - 1) * limit,
       take: limit,
@@ -59,7 +60,7 @@ export class ObservacionesService {
 
   async findOne(id: number): Promise<Observacion> {
     const observacion = await this.observacionRepository.findOne({
-      where: { id },
+      where: { id , estado: Not(0) },
       relations: ['registro', 'usuarioReporta'],
     });
     if (!observacion) {
@@ -69,7 +70,7 @@ export class ObservacionesService {
   }
 
   async update(id: number, updateObservacioneDto: UpdateObservacioneDto): Promise<Observacion> {
-    const observacion = await this.observacionRepository.findOne({ where: { id } });
+    const observacion = await this.observacionRepository.findOne({ where: { id , estado: Not(0) } });
     if (!observacion) {
       throw new NotFoundException(`Observación con id ${id} no encontrada`);
     }
@@ -97,10 +98,19 @@ export class ObservacionesService {
     return this.observacionRepository.save(observacion);
   }
 
-  async remove(id: number): Promise<void> {
-    const result = await this.observacionRepository.delete(id);
-    if (result.affected === 0) {
-      throw new NotFoundException(`Observación con id ${id} no encontrada`);
+  async remove(id: number): Promise<{ message: string; status: HttpStatus }> {
+    const observacion = await this.observacionRepository.findOne({ where: { id, estado: Not(0) } });
+    if (!observacion) {
+      throw new HttpException(`Observación con id ${id} no encontrada`, HttpStatus.NOT_FOUND);
+    }
+    observacion.estado = 0;
+    const deleteUser =await this.observacionRepository.save(observacion);
+    if (!deleteUser) {
+      throw new HttpException('Error al eliminar la observación', HttpStatus.BAD_REQUEST);
+    }
+    return{
+      message: `Observación con id ${id} eliminada correctamente`,
+      status: HttpStatus.OK,
     }
   }
 }
