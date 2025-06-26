@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateHistorialCambioDto } from './dto/create-historial-cambio.dto';
 import { UpdateHistorialCambioDto } from './dto/update-historial-cambio.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { HistorialCambio } from './entities/historial-cambio.entity';
 import { Registro } from '../registros/entities/registro.entity';
 import { User } from '../usuarios/entities/usuario.entity';
@@ -22,14 +22,14 @@ export class HistorialCambiosService {
 
   async create(createHistorialCambioDto: CreateHistorialCambioDto) {
     const registro = await this.registroRepository.findOne({
-      where: { id: createHistorialCambioDto.registro_id },
+      where: { id: createHistorialCambioDto.registro_id , estado: Not(0) },
     });
     if (!registro) {
       throw new Error('Registro no encontrado');
     }
 
     const usuario = await this.userRepository.findOne({
-      where: { id: createHistorialCambioDto.registro_id },
+      where: { id: createHistorialCambioDto.usuario_modifica_id, estado: Not(0) },
     });
     if (!usuario) {
       throw new Error('Usuario no encontrado');
@@ -53,6 +53,7 @@ export class HistorialCambiosService {
   }
   async findAll(page: number , limit: number ) {
     const [result, total] = await this.historialCambioRepository.findAndCount({
+      where: { estado: Not(0) }, // Filtrar solo los registros activos
       relations: ['registro', 'usuarioModifica'],
       skip: (page - 1) * limit,
       take: limit,
@@ -69,7 +70,7 @@ export class HistorialCambiosService {
 
   async findOne(id: number) {
     const historialCambio = await this.historialCambioRepository.findOne({
-      where: { id },
+      where: { id, estado: Not(0) },
       relations: ['registro', 'usuarioModifica'],
     });
     if (!historialCambio) {
@@ -79,14 +80,14 @@ export class HistorialCambiosService {
   }
 
   async update(id: number, updateHistorialCambioDto: UpdateHistorialCambioDto) {
-    const historialCambio = await this.historialCambioRepository.findOne({ where: { id } });
+    const historialCambio = await this.historialCambioRepository.findOne({ where: { id, estado: Not(0) } });
     if (!historialCambio) {
       throw new Error('HistorialCambio no encontrado');
     }
 
     if (updateHistorialCambioDto.registro_id) {
       const registro = await this.registroRepository.findOne({
-        where: { id: updateHistorialCambioDto.registro_id },
+        where: { id: updateHistorialCambioDto.registro_id , estado: Not(0) },
       });
       if (!registro) {
         throw new Error('Registro no encontrado');
@@ -96,7 +97,7 @@ export class HistorialCambiosService {
 
     if (updateHistorialCambioDto.usuario_modifica_id) {
       const usuario = await this.userRepository.findOne({
-        where: { id: updateHistorialCambioDto.usuario_modifica_id },
+        where: { id: updateHistorialCambioDto.usuario_modifica_id , estado: Not(0) },
       });
       if (!usuario) {
         throw new Error('Usuario no encontrado');
@@ -118,11 +119,12 @@ export class HistorialCambiosService {
   }
 
   async remove(id: number) {
-    const historialCambio = await this.historialCambioRepository.findOne({ where: { id } });
+    const historialCambio = await this.historialCambioRepository.findOne({ where: { id, estado: Not(0) } });
     if (!historialCambio) {
       throw new Error('HistorialCambio no encontrado');
     }
-    await this.historialCambioRepository.remove(historialCambio);
-    return { message: 'HistorialCambio eliminado correctamente' };
+    historialCambio.estado = 0;
+    await this.historialCambioRepository.save(historialCambio);
+    return { message: 'HistorialCambio desactivado correctamente' };
   }
 }
