@@ -19,7 +19,7 @@ export class UsuariosController {
 
   @Get('dni/:dni')
   findOneBydni(@Param('dni') dni: string) {
-    return this.usuariosService.findUserByDni(dni);
+    return this.usuariosService.findUserByTerminoBusqueda(dni);
   }
 
   @Patch(':id')

@@ -67,6 +67,17 @@ export class UsuariosService {
     return users || [];
   }
 
+    async findUserByTerminoBusqueda(termino: string) {
+      const users = await this.userRepository.find({
+        where: [
+          { dni: termino ? Like(`%${termino}%`) : undefined },
+          { apellidos: termino ? Like(`%${termino}%`) : undefined },
+        ],
+      });
+      return users || [];
+    }
+
+
 
   create(createUsuarioDto: CreateUsuarioDto, rol) {
     
