@@ -54,7 +54,7 @@ export class RegistrosService {
   async findOne(id: number): Promise<Registro> {
     const registro = await this.registroRepository.findOne({
       where: { id , estado: Not(0) },
-      relations: ['usuario', 'observacionesList', 'cambios', 'alertas'],
+      relations: ['usuario'],
     });
     if (!registro) {
       throw new NotFoundException(`Registro #${id} no encontrado`);
