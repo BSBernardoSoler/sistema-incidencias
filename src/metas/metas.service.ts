@@ -5,6 +5,7 @@ import { Meta } from './entities/meta.entity';
 import { Not, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UsuariosService } from 'src/usuarios/usuarios.service';
+import e from 'express';
 
 @Injectable()
 export class MetasService {
@@ -15,6 +16,7 @@ export class MetasService {
   ) {}  
 
   async create(createMetaDto: CreateMetaDto) {
+     const anioActual = new Date().getFullYear();
       const usuario = await this.usuariosService.findOne(createMetaDto.usuario_id);
       if (!usuario) {
         throw new HttpException('Usuario no encontrado', HttpStatus.NOT_FOUND);
@@ -27,8 +29,14 @@ export class MetasService {
         },
       });
 
-      if (existingMeta) {
-        throw new HttpException('Ya existe una meta activa para este usuario', HttpStatus.BAD_REQUEST);
+      const añóMeta = existingMeta?.fecha_registro ? new Date(existingMeta.fecha_registro).getFullYear() : null;
+      
+      const mesMeta = existingMeta?.mes ? parseInt(existingMeta.mes, 10) : null;
+      
+      if (mesMeta === parseInt(createMetaDto.mes, 10) && existingMeta) {
+        throw new HttpException('Ya existe una meta de este mes para este usuario', HttpStatus.BAD_REQUEST);
+      }else if (existingMeta && añóMeta !== anioActual) {
+        throw new HttpException('Ya existe una meta para este usuario en un año diferente', HttpStatus.BAD_REQUEST);
       }
       
       const currentMonth = new Date().getMonth() + 1; // 1-12
