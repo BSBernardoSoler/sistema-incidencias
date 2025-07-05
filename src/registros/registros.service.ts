@@ -149,28 +149,4 @@ async calcularProductividad(usuarioId: number, fecha: Date): Promise<{ productiv
 }
 
 
-async countByMetasPorMes(usuarioId: number): Promise<{ [mes: string]: number }> {
-  const year = new Date().getFullYear();
-  const result: { [mes: string]: number } = {};
-
-  for (let mes = 0; mes < 12; mes++) {
-    const startOfMonth = new Date(year, mes, 1, 0, 0, 0);
-    const endOfMonth = new Date(year, mes + 1, 0, 23, 59, 59);
-
-    const count = await this.registroRepository.count({
-      where: {
-        usuario: { id: usuarioId },
-        estado: Not(0),
-        fecha_digitacion: Between(startOfMonth, endOfMonth),
-        
-      },
-    });
-
-    // Mes en formato "01", "02", ..., "12"
-    const mesStr = (mes + 1).toString().padStart(2, '0');
-    result[mesStr] = count;
-  }
-
-  return result;
-}
 }

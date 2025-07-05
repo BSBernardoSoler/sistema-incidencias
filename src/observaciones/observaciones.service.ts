@@ -152,7 +152,7 @@ async countByMonthCurrentYear() {
     const monthIndex = Number(row.month) - 1;
     counts[monthIndex] = Number(row.count);
   });
-  
+    
   return {
     year: currentYear,
     counts,
