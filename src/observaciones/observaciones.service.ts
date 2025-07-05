@@ -3,7 +3,7 @@ import { CreateObservacionDto } from './dto/create-observacione.dto';
 import { UpdateObservacioneDto } from './dto/update-observacione.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Observacion } from './entities/observacione.entity';
-import { Not, Repository } from 'typeorm';
+import { Between, Not, Repository } from 'typeorm';
 import { Registro } from 'src/registros/entities/registro.entity';
 import { User } from 'src/usuarios/entities/usuario.entity';
 import { AlertasWebsocketsGateway } from 'src/alertas-websockets/alertas-websockets.gateway';
@@ -113,4 +113,51 @@ export class ObservacionesService {
       status: HttpStatus.OK,
     }
   }
+async countToday() {
+  const today = new Date();
+  const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0);
+  const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59);
+
+  const count = await this.observacionRepository.count({
+    where: {
+      id: Not(0),
+      fecha_observacion: Between(startOfDay, endOfDay), // Asegurarse de que la observación esté activa
+    },
+  });
+
+  return {
+    count,
+    message: `Total de observaciones creados hoy: ${count}`,
+    status: HttpStatus.OK,
+  };
+}
+
+
+
+async countByMonthCurrentYear() {
+  const currentYear = new Date().getFullYear();
+  const result = await this.observacionRepository
+    .createQueryBuilder('observacion')
+    .select("MONTH(observacion.fecha_observacion)", "month")
+    .addSelect("COUNT(*)", "count")
+    .where("YEAR(observacion.fecha_observacion) = :year", { year: currentYear })
+    .andWhere("observacion.estado != 0")
+    .groupBy("month")
+    .orderBy("month", "ASC")
+    .getRawMany();
+
+  // Map result to array of 12 months, filling missing months with 0
+  const counts = Array(12).fill(0);
+  result.forEach(row => {
+    const monthIndex = Number(row.month) - 1;
+    counts[monthIndex] = Number(row.count);
+  });
+  
+  return {
+    year: currentYear,
+    counts,
+    message: `Cantidad de observaciones por mes en el año ${currentYear}`,
+    status: HttpStatus.OK,
+  };
+}
 }

@@ -3,7 +3,7 @@ import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/usuario.entity';
-import { Like, Repository } from 'typeorm';
+import { Like, Not, Repository } from 'typeorm';
 import { Role } from 'src/roles/entities/role.entity';
 import * as  bcryptjs from 'bcryptjs';
 
@@ -187,5 +187,18 @@ export class UsuariosService {
     }
     usuario.estado = 0;
     return await this.userRepository.save(usuario);
+  }
+
+
+  async countUsuariosRegistrados() {
+    const usuario = await this.userRepository.count({
+      where: { estado: Not(0) }, // Asegurarse de contar solo usuarios activos
+    })
+   
+    return {
+      count: usuario || 0, // Asegurarse de que el conteo no sea undefined
+      message: `Total de usuarios registrados: ${usuario}`,
+      status: HttpStatus.OK,
+    };
   }
 }

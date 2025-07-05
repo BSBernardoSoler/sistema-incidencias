@@ -17,6 +17,11 @@ export class UsuariosController {
     return this.usuariosService.findAll(pageNumber, limitNumber);
   }
 
+  @Get('count')
+  countUsuariosRegistrados() {
+    return this.usuariosService.countUsuariosRegistrados();
+  }
+
   @Get('dni/:dni')
   findOneBydni(@Param('dni') dni: string) {
     return this.usuariosService.findUserByTerminoBusqueda(dni);

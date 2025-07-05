@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { CreateHistorialCambioDto } from './dto/create-historial-cambio.dto';
 import { UpdateHistorialCambioDto } from './dto/update-historial-cambio.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Not, Repository } from 'typeorm';
+import { Between, Not, Repository } from 'typeorm';
 import { HistorialCambio } from './entities/historial-cambio.entity';
 import { Registro } from '../registros/entities/registro.entity';
 import { User } from '../usuarios/entities/usuario.entity';
@@ -126,5 +126,25 @@ export class HistorialCambiosService {
     historialCambio.estado = 0;
     await this.historialCambioRepository.save(historialCambio);
     return { message: 'HistorialCambio desactivado correctamente' };
+  }
+
+
+  async countToday() {
+    const today = new Date();
+    const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0);
+    const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59);
+
+    const count = await this.historialCambioRepository.count({
+      where: {
+        id: Not(0),
+        fecha_modificacion: Between(startOfDay, endOfDay), // Asegurarse de que la modificación esté activa
+      },
+    });
+  
+    return {
+      count,
+      message: `Total de cambios realizados hoy: ${count}`,
+      status: HttpStatus.OK,
+    };
   }
 }

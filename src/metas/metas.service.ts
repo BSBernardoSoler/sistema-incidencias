@@ -124,4 +124,35 @@ export class MetasService {
     }
     return meta;
   }
+
+  // Suma total de meta_mensual de todas las metas (sin filtrar por mes actual)
+  async sumMetaMensual() {
+    const { suma } = await this.metasRepository
+      .createQueryBuilder('meta')
+      .select('SUM(meta.meta_mensual)', 'suma')
+      .where('meta.estado != 0')
+      .getRawOne();
+
+    return { suma: parseInt(suma ?? '0', 10) };
+  }
+
+  // Resumen de la suma de meta_mensual por cada mes del año actual
+  async resumenMetaMensualPorMes() {
+    const anioActual = new Date().getFullYear();
+
+    const metas = await this.metasRepository
+      .createQueryBuilder('meta')
+      .select('meta.mes', 'mes')
+      .addSelect('SUM(meta.meta_mensual)', 'suma')
+      .where('meta.estado != 0')
+      .andWhere('YEAR(meta.fecha_registro) = :anioActual', { anioActual })
+      .groupBy('meta.mes')
+      .orderBy('meta.mes', 'ASC')
+      .getRawMany();
+
+    return metas.map(m => ({
+      mes: m.mes,
+      suma: parseInt(m.suma, 10),
+    }));
+  }
 }

@@ -11,6 +11,16 @@ export class ObservacionesController {
   create(@Body() createObservacioneDto: CreateObservacionDto) {
     return this.observacionesService.create(createObservacioneDto);
   }
+  
+  @Get('countByDay')
+  countByDay() {
+    return this.observacionesService.countToday();
+  }
+
+  @Get('countByMonth')
+  countByMonth() {
+    return this.observacionesService.countByMonthCurrentYear();
+  }
 
   @Get()
   findAll(
@@ -22,6 +32,7 @@ export class ObservacionesController {
   const skip = (pageNumber - 1) * limitNumber;
     return this.observacionesService.findAll(pageNumber, limitNumber);
   }
+
 
   @Get(':id')
   findOne(@Param('id') id: string) {

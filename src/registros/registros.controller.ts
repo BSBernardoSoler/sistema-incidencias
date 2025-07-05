@@ -12,6 +12,13 @@ export class RegistrosController {
     return this.registrosService.create(createRegistroDto);
   }
 
+
+   @Get('countByDay')
+  countByDay() {
+    return this.registrosService.countToday();
+  }
+
+
   @Get()
   findAll(
      @Query('page') page: string,
@@ -27,6 +34,10 @@ export class RegistrosController {
   findOne(@Param('id') id: string) {
     return this.registrosService.findOne(+id);
   }
+  
+  
+ 
+
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateRegistroDto: UpdateRegistroDto) {

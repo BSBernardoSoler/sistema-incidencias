@@ -11,11 +11,16 @@ export class MetasController {
   create(@Body() createMetaDto: CreateMetaDto) {
     return this.metasService.create(createMetaDto);
   }
-@Get()
-findAll(
-  @Query('page') page: string,
-  @Query('limit') limit: string
-) {
+  @Get('countByMonth')
+  countByMonth() {
+    return this.metasService.resumenMetaMensualPorMes();
+  }
+
+  @Get()
+  findAll(
+    @Query('page') page: string,
+    @Query('limit') limit: string
+  ) {
   const pageNumber = Number(page) || 1;
   const limitNumber = Number(limit) || 10;
   const skip = (pageNumber - 1) * limitNumber;

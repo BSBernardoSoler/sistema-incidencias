@@ -22,6 +22,11 @@ export class HistorialCambiosController {
     return this.historialCambiosService.findAll(pageNumber, limitNumber);
   }
 
+    @Get('countByDay')
+  countByDay(@Param('id') id: string) {
+    return this.historialCambiosService.countToday();
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.historialCambiosService.findOne(+id);
