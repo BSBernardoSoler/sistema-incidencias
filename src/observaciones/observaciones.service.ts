@@ -160,4 +160,14 @@ async countByMonthCurrentYear() {
     status: HttpStatus.OK,
   };
 }
+
+async findAllObservations(): Promise<any[]> {
+  return this.observacionRepository.find({
+    relations: ['usuarioReporta'],
+    order: {
+      fecha_observacion: 'DESC',
+    },
+  });
+}
+
 }

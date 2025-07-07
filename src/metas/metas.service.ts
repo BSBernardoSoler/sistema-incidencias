@@ -155,4 +155,16 @@ export class MetasService {
       suma: parseInt(m.suma, 10),
     }));
   }
+
+
+
+  async findAllGoals(): Promise<any[]> {
+  return this.metasRepository.find({
+    relations: ['usuario'],
+    order: {
+      fecha_registro: 'DESC',
+    },
+  });
+}
+
 }

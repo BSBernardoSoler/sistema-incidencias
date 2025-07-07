@@ -147,4 +147,14 @@ export class HistorialCambiosService {
       status: HttpStatus.OK,
     };
   }
+
+  async findAllChangeHistory(): Promise<any[]> {
+  return this.historialCambioRepository.find({
+    relations: ['usuarioModifica'],
+    order: {
+      fecha_modificacion: 'DESC',
+    },
+  });
+}
+
 }

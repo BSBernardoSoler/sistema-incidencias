@@ -149,4 +149,16 @@ async calcularProductividad(usuarioId: number, fecha: Date): Promise<{ productiv
 }
 
 
+
+async findAllWithUsers(): Promise<any[]> {
+  return this.registroRepository.find({
+    relations: ['usuario'],
+    order: {
+      fecha_digitacion: 'DESC',
+    },
+  });
+}
+
+
+
 }

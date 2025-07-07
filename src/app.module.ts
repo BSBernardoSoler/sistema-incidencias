@@ -12,6 +12,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { envs } from './config/envs';
 import { AlertasWebsocketsModule } from './alertas-websockets/alertas-websockets.module';
+import { PdfReportModule } from './pdf-report/pdf-report.module';
 
 
 @Module({
@@ -35,7 +36,8 @@ import { AlertasWebsocketsModule } from './alertas-websockets/alertas-websockets
     AlertasModule,
     RolesModule,
     AuthModule,
-    AlertasWebsocketsModule
+    AlertasWebsocketsModule,
+    PdfReportModule
   ],
   controllers: [AppController],
   providers: [AppService],

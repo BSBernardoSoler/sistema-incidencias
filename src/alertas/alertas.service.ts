@@ -81,4 +81,14 @@ export class AlertasService {
     alerta.estado = 0;
     await this.alertaRepository.save(alerta);
   }
+
+  async findAllAlerts(): Promise<any[]> {
+  return this.alertaRepository.find({
+    relations: ['registro'],
+    order: {
+      fecha_generada: 'DESC',
+    },
+  });
+}
+
 }
