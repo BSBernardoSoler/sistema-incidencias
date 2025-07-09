@@ -7,6 +7,7 @@ import { Between, Not, Repository } from 'typeorm';
 import { User } from 'src/usuarios/entities/usuario.entity';
 import { AlertasWebsocketsGateway } from 'src/alertas-websockets/alertas-websockets.gateway';
 import { date } from 'joi';
+import { MetasService } from 'src/metas/metas.service';
 
 @Injectable()
 export class RegistrosService {
@@ -17,6 +18,8 @@ export class RegistrosService {
     private readonly userRepository: Repository<User>,
     @Inject(forwardRef(() => AlertasWebsocketsGateway)) 
     private readonly alertasWebsocketsGateWay: AlertasWebsocketsGateway, // Inject the AlertasWebsocketsService
+
+    private readonly metasService: MetasService, // Inject the MetasService if needed
   ) {}
 
   async create(createRegistroDto: CreateRegistroDto): Promise<Registro> {
@@ -157,6 +160,50 @@ async findAllWithUsers(): Promise<any[]> {
       fecha_digitacion: 'DESC',
     },
   });
+}
+
+async ProductividadMesualTotal() {
+  const metapormes = await this.metasService.resumenMetaMensualPorMes();
+
+  const now = new Date();
+  const currentMonth = (now.getMonth() + 1).toString().padStart(2, '0');
+  const currentYear = now.getFullYear();
+
+  const metaActual = metapormes.find((m: any) => m.mes === currentMonth);
+
+  if (!metaActual) {
+    return {
+      porcentaje: 0,
+      meta: 0,
+      suma: 0,
+      message: `No hay meta definida para el mes actual (${currentMonth})`
+    };
+  }
+
+  // Calcular el rango de fechas del mes actual
+  const startOfMonth = new Date(currentYear, now.getMonth(), 1, 0, 0, 0);
+  const endOfMonth = new Date(currentYear, now.getMonth() + 1, 0, 23, 59, 59);
+
+  // Contar registros con estado 3 en el mes actual
+  const sumaActual = await this.registroRepository.count({
+    where: {
+      estado: Not(0), // Asegurarse de que el registro esté activo
+      estado_validacion:"validado",
+      fecha_digitacion: Between(startOfMonth, endOfMonth),
+    },
+  });
+
+  const meta = metaActual.suma || 0;
+
+  // Evitar división por cero
+  const porcentaje = meta > 0 ? Math.round((sumaActual / meta) * 100) : 0;
+
+  return {
+    porcentaje,
+    meta,
+    suma: sumaActual,
+    message: `Porcentaje de cumplimiento del mes ${currentMonth}: ${porcentaje}%`
+  };
 }
 
 

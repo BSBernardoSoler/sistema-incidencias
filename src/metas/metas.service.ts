@@ -158,6 +158,9 @@ export class MetasService {
 
 
 
+
+
+
   async findAllGoals(): Promise<any[]> {
   return this.metasRepository.find({
     relations: ['usuario'],

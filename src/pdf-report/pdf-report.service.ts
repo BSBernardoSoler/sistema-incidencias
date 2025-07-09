@@ -77,7 +77,7 @@ export class PdfReportService {
       ...data.map((row) => [
         row.tipo_alerta,
         row.descripcion,
-        row.fecha_generada,
+        String(row.fecha_generada),
         row.resuelta ? 'Sí' : 'No',
       ]),
     ];
@@ -112,7 +112,7 @@ export class PdfReportService {
         row.campo_modificado,
         row.valor_anterior,
         row.valor_nuevo,
-        row.fecha_modificacion,
+        String(row.fecha_modificacion),
         `${row.usuarioModifica.nombres} ${row.usuarioModifica.apellidos}`,
       ]),
     ];
@@ -148,7 +148,7 @@ export class PdfReportService {
         row.meta_diaria,
         row.meta_mensual,
         `${row.usuario.nombres} ${row.usuario.apellidos}`,
-        row.fecha_registro,
+        String(row.fecha_registro),
       ]),
     ];
 
@@ -182,7 +182,7 @@ export class PdfReportService {
         row.detalle_observacion,
         row.estado,
         row.respuesta_digitador ?? 'Sin respuesta',
-        row.fecha_observacion,
+        String(row.fecha_observacion),
         `${row.usuarioReporta.nombres} ${row.usuarioReporta.apellidos}`,
       ]),
     ];

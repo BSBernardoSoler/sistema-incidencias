@@ -95,7 +95,7 @@ export class AlertasService {
     relations: ['registro'],
     order: {
       fecha_generada: 'DESC',
-    },
+    }
   });
 }
 

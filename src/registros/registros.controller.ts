@@ -18,6 +18,10 @@ export class RegistrosController {
     return this.registrosService.countToday();
   }
 
+ @Get('productividad')
+  productividad() {
+    return this.registrosService.ProductividadMesualTotal();
+  }
 
   @Get()
   findAll(
