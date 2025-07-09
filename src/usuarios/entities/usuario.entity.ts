@@ -27,6 +27,10 @@ export class User {
   @Column({default: null})
   telefono: string;
 
+  
+  @Column({default: null})
+  condicionLaboral: string;
+
 
   @Column({select: false})
   password: string;

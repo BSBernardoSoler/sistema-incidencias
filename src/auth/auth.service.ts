@@ -45,6 +45,7 @@ export class AuthService {
     rol_id : createUsuarioDto.rol_id,
     correo : createUsuarioDto.correo,
     telefono : createUsuarioDto.telefono,
+    condicionLaboral : createUsuarioDto.condicionLaboral,
    },role);
 
    if(!newuser){

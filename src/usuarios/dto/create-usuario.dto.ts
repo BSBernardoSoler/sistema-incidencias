@@ -12,6 +12,10 @@ export class CreateUsuarioDto {
 
   @IsNotEmpty()
   @IsString()
+  condicionLaboral: string;
+
+  @IsNotEmpty()
+  @IsString()
   @Matches(/^\d{8}$/, { message: 'El DNI debe tener exactamente 8 dígitos numéricos' })
   dni: string;
 

@@ -9,7 +9,12 @@ export class UpdateUsuarioDto {
     @IsOptional()
     @IsString()
     apellidos?: string;
+
     
+   @IsOptional()
+   @IsString()
+   condicionLaboral?: string;
+
     @IsOptional()
     @IsString()
     @Matches(/^\d{8}$/, { message: 'El DNI debe tener exactamente 8 dígitos' })

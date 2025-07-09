@@ -95,6 +95,7 @@ export class UsuariosService {
         id: true,
         nombres: true,
         apellidos: true,
+        condicionLaboral: true,
         telefono: true,
         password: false, // No devolver la contraseña
         correo: true,
