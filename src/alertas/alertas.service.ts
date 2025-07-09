@@ -1,9 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateAlertaDto } from './dto/create-alerta.dto';
 import { UpdateAlertaDto } from './dto/update-alerta.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Alerta } from './entities/alerta.entity';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { Registro } from 'src/registros/entities/registro.entity';
 
 @Injectable()
@@ -33,7 +33,7 @@ export class AlertasService {
 
   async findAll(page: number = 1, limit: number = 10): Promise<{ data: Alerta[]; total: number; page: number; limit: number }> {
     const [data, total] = await this.alertaRepository.findAndCount({
-      where: { estado: 1 },
+      where: { estado: Not(0) },
       order: { id: 'DESC' },
       relations: ['registro'],
       skip: (page - 1) * limit,
@@ -73,13 +73,21 @@ export class AlertasService {
     return this.alertaRepository.save(alerta);
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: number) {
     const alerta = await this.alertaRepository.findOne({ where: { id, estado: 1 } });
     if (!alerta) {
-      throw new NotFoundException('Alerta no encontrada');
+      throw new HttpException('Alerta no encontrada', HttpStatus.NOT_FOUND);
     }
     alerta.estado = 0;
-    await this.alertaRepository.save(alerta);
+    const userdelete = await this.alertaRepository.save(alerta);
+    if (!userdelete) {
+      throw new HttpException('Error al eliminar la alerta', HttpStatus.BAD_REQUEST);
+    }
+
+    return{
+      message: 'Alerta eliminada correctamente',
+      alerta: userdelete,
+    }
   }
 
   async findAllAlerts(): Promise<any[]> {
